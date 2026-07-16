@@ -1,0 +1,6 @@
+{
+  "name": "SkillnovaX",
+  "description": "India's smart AI-powered hyperlocal home service marketplace connect customers with verified professionals.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

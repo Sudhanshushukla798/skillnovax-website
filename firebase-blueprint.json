@@ -1,0 +1,137 @@
+{
+  "entities": {
+    "WaitlistProduction": {
+      "title": "WaitlistProduction",
+      "description": "Represents a production early access waitlist registration",
+      "type": "object",
+      "properties": {
+        "fullName": {
+          "type": "string",
+          "description": "The user's full name",
+          "minLength": 2,
+          "maxLength": 100
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "The user's mobile/phone number (only digits)",
+          "pattern": "^[0-9]{10}$"
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address",
+          "maxLength": 255
+        },
+        "userType": {
+          "type": "string",
+          "description": "The user type",
+          "enum": ["Customer", "Worker"]
+        },
+        "selectedServices": {
+          "type": "array",
+          "description": "Selected trade skills or services of interest"
+        },
+        "state": {
+          "type": "string",
+          "description": "The user's Indian State or Union Territory",
+          "maxLength": 100
+        },
+        "district": {
+          "type": "string",
+          "description": "The user's district within the state",
+          "maxLength": 100
+        },
+        "tehsil": {
+          "type": "string",
+          "description": "The user's Tehsil (taluka/block) within the district",
+          "maxLength": 100
+        },
+        "status": {
+          "type": "string",
+          "description": "The registration status",
+          "enum": ["Pending", "Verified", "Contacted", "Approved", "Blocked"]
+        },
+        "source": {
+          "type": "string",
+          "description": "The registration source",
+          "enum": ["Website", "Instagram", "Facebook", "WhatsApp", "Referral", "Google"]
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Server timestamp of creation"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Server timestamp of last update"
+        }
+      },
+      "required": ["fullName", "phoneNumber", "email", "userType", "selectedServices", "state", "district", "tehsil", "status", "source", "createdAt", "updatedAt"]
+    },
+    "WaitlistEntry": {
+      "title": "WaitlistEntry",
+      "description": "Represents an early access waitlist registration",
+      "type": "object",
+      "properties": {
+        "fullName": {
+          "type": "string",
+          "description": "The user's full name",
+          "minLength": 2,
+          "maxLength": 100
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "The user's mobile/phone number",
+          "pattern": "^[0-9]{10}$"
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address",
+          "maxLength": 255
+        },
+        "state": {
+          "type": "string",
+          "description": "The user's Indian State or Union Territory",
+          "maxLength": 100
+        },
+        "district": {
+          "type": "string",
+          "description": "The user's district within the state",
+          "maxLength": 100
+        },
+        "tehsil": {
+          "type": "string",
+          "description": "The user's Tehsil (taluka/block) within the district",
+          "maxLength": 100
+        },
+        "city": {
+          "type": "string",
+          "description": "The user's launching city (legacy support)",
+          "maxLength": 200
+        },
+        "role": {
+          "type": "string",
+          "description": "The user's role (customer or worker)",
+          "enum": ["customer", "worker"]
+        },
+        "selectedServices": {
+          "type": "array",
+          "description": "Selected trade skills or services of interest"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Server timestamp of creation"
+        }
+      },
+      "required": ["fullName", "phoneNumber", "email", "state", "district", "tehsil", "role", "selectedServices", "createdAt"]
+    }
+  },
+  "firestore": {
+    "Waitlist/{waitlistId}": {
+      "schema": "WaitlistProduction",
+      "description": "Collection of waitlist submissions (production)"
+    },
+    "waitlist/{waitlistId}": {
+      "schema": "WaitlistEntry",
+      "description": "Collection of waitlist submissions"
+    }
+  }
+}

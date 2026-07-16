@@ -1,0 +1,91 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Safety Net: default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+    
+    function incoming() { 
+      return request.resource.data; 
+    }
+    
+    // Validation helper for Waitlist (new production structure)
+    function isValidWaitlistDoc(data) {
+      return data.keys().hasAll(['fullName', 'phoneNumber', 'email', 'userType', 'selectedServices', 'state', 'district', 'tehsil', 'status', 'source', 'createdAt', 'updatedAt'])
+        && data.keys().size() == 12
+        && data.fullName is string
+        && data.fullName.size() >= 2
+        && data.fullName.size() <= 100
+        && data.phoneNumber is string
+        && data.phoneNumber.matches('^[0-9]{10}$')
+        && data.email is string
+        && data.email.size() <= 255
+        && data.userType is string
+        && (data.userType == 'Customer' || data.userType == 'Worker')
+        && data.selectedServices is list
+        && data.selectedServices.size() <= 20
+        && data.state is string
+        && data.state.size() <= 100
+        && data.district is string
+        && data.district.size() <= 100
+        && data.tehsil is string
+        && data.tehsil.size() <= 100
+        && data.status is string
+        && (data.status == 'Pending' || data.status == 'Verified' || data.status == 'Contacted' || data.status == 'Approved' || data.status == 'Blocked')
+        && data.source is string
+        && (data.source == 'Website' || data.source == 'Instagram' || data.source == 'Facebook' || data.source == 'WhatsApp' || data.source == 'Referral' || data.source == 'Google')
+        && data.createdAt == request.time
+        && data.updatedAt == request.time;
+    }
+
+    // Validation helper for WaitlistEntry
+    function isValidWaitlistEntry(data) {
+      return (
+        // New State-District-Tehsil structure
+        (data.keys().hasAll(['fullName', 'phoneNumber', 'email', 'state', 'district', 'tehsil', 'role', 'selectedServices', 'createdAt'])
+         && (data.keys().size() == 9 || (data.keys().size() == 10 && data.city is string && data.city.size() <= 200))
+         && data.state is string && data.state.size() <= 100
+         && data.district is string && data.district.size() <= 100
+         && data.tehsil is string && data.tehsil.size() <= 100)
+        ||
+        // Legacy city-only structure
+        (data.keys().hasAll(['fullName', 'phoneNumber', 'email', 'city', 'role', 'selectedServices', 'createdAt'])
+         && data.keys().size() == 7
+         && data.city is string && data.city.size() <= 100)
+      )
+      && data.fullName is string 
+      && data.fullName.size() >= 2 
+      && data.fullName.size() <= 100
+      && data.phoneNumber is string 
+      && data.phoneNumber.matches('^[0-9]{10}$')
+      && data.email is string 
+      && data.email.size() <= 255
+      && data.role is string 
+      && (data.role == 'customer' || data.role == 'worker')
+      && data.selectedServices is list
+      && data.selectedServices.size() <= 20
+      && data.createdAt == request.time;
+    }
+
+    // Waitlist collection rules
+    match /Waitlist/{waitlistId} {
+      allow create: if isValidId(waitlistId) && isValidWaitlistDoc(incoming());
+      allow read: if true;
+    }
+
+    match /waitlist/{waitlistId} {
+      // Anyone can submit to the early access waitlist as long as payload is valid
+      allow create: if isValidId(waitlistId) && isValidWaitlistEntry(incoming());
+      
+      // For the investor demo dashboard, allow fetching the signups list
+      allow read: if true;
+    }
+  }
+}
